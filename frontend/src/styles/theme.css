@@ -1,0 +1,26 @@
+/* Base pastel theme: soft tones only, no bright colours. */
+:root {
+  --color-bg: #fdf6fb;
+  --color-surface: #ffffff;
+  --color-border: #ecd9ea;
+  --color-text: #4a3f55;
+  --color-text-soft: #8a7b96;
+
+  --color-pink: #f8c8dc;
+  --color-pink-strong: #eba4c4;
+  --color-lavender: #d9c9f2;
+  --color-lavender-strong: #c0a8e6;
+  --color-mint: #c9ecdc;
+  --color-peach: #fde0cc;
+  --color-sky: #cde4f7;
+  --color-danger: #f3b7b7;
+
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --font-size-base: 1.25rem; /* big-screen friendly */
+  --font-size-small: 1rem;
+  --font-size-title: 2.25rem;
+
+  --radius: 16px;
+  --shadow: 0 4px 14px rgba(138, 123, 150, 0.15);
+  --space: 1rem;
+}
