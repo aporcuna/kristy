@@ -165,6 +165,21 @@ textarea.input { resize: vertical; min-height: 4.5rem; }
 .toy-list__item--active { border-color: var(--color-pink-strong); background: var(--color-pink); }
 .toy-list__meta { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
 .toy-list__name { font-weight: 700; overflow-wrap: anywhere; }
+.toy-list__select {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.toy-list__select:focus-visible { outline: 3px solid var(--color-pink-strong); outline-offset: 2px; border-radius: 12px; }
+.toy-list__select:disabled { cursor: not-allowed; }
 
 .status-badge {
   align-self: flex-start;
