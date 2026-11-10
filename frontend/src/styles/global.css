@@ -131,6 +131,69 @@ textarea.input { resize: vertical; min-height: 4.5rem; }
 .detail__prices label { font-weight: 700; }
 .detail__value { background: var(--color-surface); border-radius: 12px; padding: 0.4rem 1rem; min-height: 2.6rem; }
 .detail__price-input { font-size: 1.5rem; font-weight: 700; }
+.auction__body { display: flex; gap: 1.25rem; align-items: flex-start; flex-wrap: wrap; }
+.auction__body .detail { flex: 1 1 32rem; }
+.toy-list {
+  flex: 0 0 18rem;
+  width: 18rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+.toy-list__title { font-size: 1.4rem; margin-bottom: 0.75rem; }
+.toy-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.toy-list__item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: var(--color-bg);
+}
+.toy-list__item--active { border-color: var(--color-pink-strong); background: var(--color-pink); }
+.toy-list__meta { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.toy-list__name { font-weight: 700; overflow-wrap: anywhere; }
+.toy-list__select {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.toy-list__select:focus-visible { outline: 3px solid var(--color-pink-strong); outline-offset: 2px; border-radius: 12px; }
+.toy-list__select:disabled { cursor: not-allowed; }
+
+.status-badge {
+  align-self: flex-start;
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: var(--color-sky);
+}
+.status-badge--new { background: var(--color-sky); }
+.status-badge--active { background: var(--color-mint); }
+.status-badge--on-hold { background: var(--color-peach); }
+.status-badge--sold { background: var(--color-lavender); }
+
 .auction__controls { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
 .auction__controls .btn { font-size: 1.4rem; padding: 0.7rem 2rem; }
 .auction__spacer { margin-left: auto; }
