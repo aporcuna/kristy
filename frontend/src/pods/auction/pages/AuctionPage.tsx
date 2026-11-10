@@ -5,6 +5,7 @@ import { ApiError, errorMessage } from '../../../core/api';
 import { Button } from '../../../ui/atoms/Button';
 import { ConfirmDialog } from '../../../ui/molecules/ConfirmDialog';
 import { PageTemplate } from '../../../ui/templates/PageTemplate';
+import { AuctionToyList } from '../components/AuctionToyList';
 import { ToyDetailPanel } from '../components/ToyDetailPanel';
 import { auctionService } from '../services/auctionService';
 
@@ -61,7 +62,10 @@ export function AuctionPage() {
     <PageTemplate title={auction.name} hideNav>
       <div className="auction">
         {error && <div className="error">{error}</div>}
-        {active ? <ToyDetailPanel lot={active} /> : <p className="muted">No toy selected.</p>}
+        <div className="auction__body">
+          <AuctionToyList toys={auction.toys} />
+          {active ? <ToyDetailPanel lot={active} /> : <p className="muted">No toy selected.</p>}
+        </div>
         <div className="auction__controls">
           <Button disabled={!canPrevious} onClick={() => move('previous')}>Previous</Button>
           <Button disabled={!canNext} onClick={() => move('next')}>Next</Button>
