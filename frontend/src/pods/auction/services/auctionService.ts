@@ -8,6 +8,8 @@ export const auctionService = {
   close: () => request<void>('/auction', { method: 'DELETE' }),
   setActive: (toyId: string) =>
     request<AuctionDetail>('/auction/active', { method: 'POST', body: JSON.stringify({ toyId }) }),
+  reopen: (toyId: string) =>
+    request<AuctionDetail>('/auction/reopen', { method: 'POST', body: JSON.stringify({ toyId }) }),
   navigate: (direction: Direction) =>
     request<AuctionDetail>('/auction/navigate', { method: 'POST', body: JSON.stringify({ direction }) }),
 };

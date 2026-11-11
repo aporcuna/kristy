@@ -1,6 +1,8 @@
 import crypto from 'node:crypto';
 import {
+  changeActiveToy,
   findAdjacentPendingIndex,
+  reopenSoldToy,
   type Auction,
   type AuctionToy,
   type Direction,
@@ -33,19 +35,19 @@ export function createAuction(name: string, toys: Toy[]): Auction {
 export function setActiveToy(auction: Auction, toyId: string): Auction {
   const target = auction.toys.find((t) => t.toyId === toyId);
   if (!target) throw new HttpError(404, 'Toy is not part of the auction');
-  if (target.status === 'Sold') throw new HttpError(409, 'A sold toy cannot be activated here');
-  if (target.status === 'Active') return auction;
+  if (target.status === 'Sold') throw new HttpError(409, 'A sold toy must be reopened');
+  return changeActiveToy(auction, toyId);
+}
 
-  return {
-    ...auction,
-    toys: auction.toys.map((t) => {
-      if (t.toyId === toyId) return { ...t, status: 'Active' };
-      if (t.status === 'Active') {
-        return { ...t, status: t.currentBidderId !== null ? 'On hold' : 'New' };
-      }
-      return t;
-    }),
-  };
+/**
+ * Reopens a Sold toy as Active, resetting it to its start price and clearing
+ * the sale price and bidder. The previously active toy is left as usual.
+ */
+export function reopenToy(auction: Auction, toyId: string, startPrice: number): Auction {
+  const target = auction.toys.find((t) => t.toyId === toyId);
+  if (!target) throw new HttpError(404, 'Toy is not part of the auction');
+  if (target.status !== 'Sold') throw new HttpError(409, 'Only a sold toy can be reopened');
+  return reopenSoldToy(auction, toyId, startPrice);
 }
 
 /** Previous / Next: moves to the closest New or On hold toy, skipping Sold ones. */

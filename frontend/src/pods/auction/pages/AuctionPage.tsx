@@ -45,8 +45,10 @@ export function AuctionPage() {
 
   const confirmSelect = async () => {
     if (!confirmSelectToyId) return;
+    const toyId = confirmSelectToyId;
+    const sold = auction?.toys.find((t) => t.toyId === toyId)?.status === 'Sold';
     try {
-      setAuction(await auctionService.setActive(confirmSelectToyId));
+      setAuction(sold ? await auctionService.reopen(toyId) : await auctionService.setActive(toyId));
       setError(null);
     } catch (e) {
       setError(errorMessage(e));
@@ -70,6 +72,8 @@ export function AuctionPage() {
   const active = findActiveToy(auction.toys);
   const canPrevious = findAdjacentPendingIndex(auction.toys, 'previous') !== -1;
   const canNext = findAdjacentPendingIndex(auction.toys, 'next') !== -1;
+  const reopening = confirmSelectToyId !== null
+    && auction.toys.find((t) => t.toyId === confirmSelectToyId)?.status === 'Sold';
 
   return (
     <PageTemplate title={auction.name} hideNav>
@@ -88,9 +92,11 @@ export function AuctionPage() {
 
       {confirmSelectToyId && (
         <ConfirmDialog
-          title="Change active toy"
-          message="Are you sure to change the active toy?"
-          confirmLabel="Change toy"
+          title={reopening ? 'Reopen sold toy' : 'Change active toy'}
+          message={reopening
+            ? 'This toy is sold. Reopening it will restart its auction from the start price. Are you sure?'
+            : 'Are you sure to change the active toy?'}
+          confirmLabel={reopening ? 'Reopen toy' : 'Change toy'}
           onConfirm={confirmSelect}
           onCancel={() => setConfirmSelectToyId(null)}
         />

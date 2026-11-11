@@ -3,7 +3,7 @@ import type { Auction, AuctionDetail, Direction } from '@kristy/shared';
 import { HttpError } from '../core/httpError';
 import { toysRepository } from '../toys/toys.repository';
 import { auctionRepository } from './auction.repository';
-import { createAuction, navigate, setActiveToy } from './auction.service';
+import { createAuction, navigate, reopenToy, setActiveToy } from './auction.service';
 
 function current(): Auction {
   const auction = auctionRepository.get();
@@ -51,6 +51,15 @@ auctionRouter.delete('/', (_req, res) => {
 
 auctionRouter.post('/active', (req, res) => {
   const auction = setActiveToy(current(), String(req.body?.toyId ?? ''));
+  auctionRepository.save(auction);
+  res.json(toDetail(auction));
+});
+
+auctionRouter.post('/reopen', (req, res) => {
+  const toyId = String(req.body?.toyId ?? '');
+  const toy = toysRepository.all().find((t) => t.id === toyId);
+  if (!toy) throw new HttpError(400, `Unknown toy: ${toyId}`);
+  const auction = reopenToy(current(), toyId, toy.startPrice);
   auctionRepository.save(auction);
   res.json(toDetail(auction));
 });

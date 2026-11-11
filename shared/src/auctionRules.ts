@@ -1,7 +1,13 @@
-import type { AuctionToyDetail, AuctionToyStatus, Direction } from './types';
+import type { Auction, AuctionToy, AuctionToyDetail, AuctionToyStatus, Direction } from './types';
 
 interface HasStatus {
   status: AuctionToyStatus;
+}
+
+/** Leaves the active toy: On hold when it has bids, otherwise back to New. */
+function leaveActiveToy(toy: AuctionToy): AuctionToy {
+  if (toy.status !== 'Active') return toy;
+  return { ...toy, status: toy.currentBidderId !== null ? 'On hold' : 'New' };
 }
 
 /** A toy that can still be auctioned: New or On hold. */
@@ -52,4 +58,49 @@ export function findAdjacentPendingIndex(
     if (isPending(toys[i].status)) return i;
   }
   return -1;
+}
+
+/**
+ * Makes a New / On hold toy active, leaving the previous active toy On hold
+ * when it has bids (keeping its data) or back to New when it has none.
+ * Sold toys must be reopened instead.
+ */
+export function changeActiveToy(auction: Auction, toyId: string): Auction {
+  const target = auction.toys.find((t) => t.toyId === toyId);
+  if (!target) throw new Error('Toy is not part of the auction');
+  if (target.status === 'Sold') throw new Error('A sold toy must be reopened');
+  if (target.status === 'Active') return auction;
+
+  return {
+    ...auction,
+    toys: auction.toys.map((t) =>
+      t.toyId === toyId ? { ...t, status: 'Active' } : leaveActiveToy(t),
+    ),
+  };
+}
+
+/**
+ * Reopens a Sold toy as Active, resetting it to its start price and clearing
+ * the sale price and bidder. The previously active toy is left as usual.
+ */
+export function reopenSoldToy(auction: Auction, toyId: string, startPrice: number): Auction {
+  const target = auction.toys.find((t) => t.toyId === toyId);
+  if (!target) throw new Error('Toy is not part of the auction');
+  if (target.status !== 'Sold') throw new Error('Only a sold toy can be reopened');
+
+  return {
+    ...auction,
+    toys: auction.toys.map((t) => {
+      if (t.toyId === toyId) {
+        return {
+          ...t,
+          status: 'Active',
+          nextBidPrice: startPrice,
+          salePrice: null,
+          currentBidderId: null,
+        };
+      }
+      return leaveActiveToy(t);
+    }),
+  };
 }

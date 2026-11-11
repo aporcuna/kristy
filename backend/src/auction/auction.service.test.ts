@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Auction, AuctionToyStatus, Toy } from '@kristy/shared';
-import { createAuction, navigate, setActiveToy } from './auction.service';
+import { createAuction, navigate, reopenToy, setActiveToy } from './auction.service';
 
 const toy = (id: string, startPrice = 50): Toy => ({
   id,
@@ -65,6 +65,45 @@ describe('setActiveToy', () => {
   it('rejects unknown and sold toys', () => {
     expect(() => setActiveToy(auctionWith({ A: 'New' }), 'Z')).toThrow();
     expect(() => setActiveToy(auctionWith({ A: 'Sold' }), 'A')).toThrow();
+  });
+});
+
+describe('reopenToy', () => {
+  it('reopens a Sold toy reset to its start price', () => {
+    const next = reopenToy(auctionWith({ A: 'Sold', B: 'New' }, ['A']), 'A', 25);
+    expect(statusOf(next)).toEqual({ A: 'Active', B: 'New' });
+    expect(next.toys[0]).toMatchObject({
+      status: 'Active',
+      nextBidPrice: 25,
+      salePrice: null,
+      currentBidderId: null,
+    });
+  });
+
+  it('puts the previous active toy On hold keeping its bid data', () => {
+    const next = reopenToy(auctionWith({ A: 'Active', B: 'Sold' }, ['A']), 'B', 25);
+    expect(statusOf(next)).toEqual({ A: 'On hold', B: 'Active' });
+    expect(next.toys[0]).toMatchObject({ nextBidPrice: 70, salePrice: 60, currentBidderId: 'tony' });
+  });
+
+  it('sends the previous active toy back to New when it has no bids', () => {
+    const next = reopenToy(auctionWith({ A: 'Active', B: 'Sold' }), 'B', 25);
+    expect(statusOf(next)).toEqual({ A: 'New', B: 'Active' });
+  });
+
+  it('does not change non-target toys', () => {
+    const next = reopenToy(auctionWith({ A: 'Sold', B: 'On hold' }, ['B']), 'A', 25);
+    expect(next.toys[1]).toMatchObject({
+      status: 'On hold',
+      nextBidPrice: 70,
+      salePrice: 60,
+      currentBidderId: 'tony',
+    });
+  });
+
+  it('rejects unknown toys and toys that are not sold', () => {
+    expect(() => reopenToy(auctionWith({ A: 'New' }), 'Z', 25)).toThrow();
+    expect(() => reopenToy(auctionWith({ A: 'New' }), 'A', 25)).toThrow();
   });
 });
 
