@@ -6,7 +6,8 @@
         "write": "allow",
         "read": "allow",
         "glob": "allow",
-        "grep": "allow"
+        "grep": "allow",
+        "external_directory": "allow"
     },
     "model": "opencode/big-pickle"
 }
