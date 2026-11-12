@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import {
   findAdjacentPendingIndex,
+  selectToy as selectToyRule,
   type Auction,
   type AuctionToy,
   type Direction,
@@ -34,18 +35,19 @@ export function setActiveToy(auction: Auction, toyId: string): Auction {
   const target = auction.toys.find((t) => t.toyId === toyId);
   if (!target) throw new HttpError(404, 'Toy is not part of the auction');
   if (target.status === 'Sold') throw new HttpError(409, 'A sold toy cannot be activated here');
-  if (target.status === 'Active') return auction;
+  return selectToyRule(auction, toyId, target.nextBidPrice);
+}
 
-  return {
-    ...auction,
-    toys: auction.toys.map((t) => {
-      if (t.toyId === toyId) return { ...t, status: 'Active' };
-      if (t.status === 'Active') {
-        return { ...t, status: t.currentBidderId !== null ? 'On hold' : 'New' };
-      }
-      return t;
-    }),
-  };
+/**
+ * Activates `toyId` from the auction list, including reopening a Sold toy and
+ * resetting it to its catalogue start price.
+ */
+export function selectToy(auction: Auction, toyId: string, toys: Toy[]): Auction {
+  const target = auction.toys.find((t) => t.toyId === toyId);
+  if (!target) throw new HttpError(404, 'Toy is not part of the auction');
+  const toy = toys.find((t) => t.id === toyId);
+  if (!toy) throw new HttpError(404, 'Toy is not part of the catalogue');
+  return selectToyRule(auction, toyId, toy.startPrice);
 }
 
 /** Previous / Next: moves to the closest New or On hold toy, skipping Sold ones. */

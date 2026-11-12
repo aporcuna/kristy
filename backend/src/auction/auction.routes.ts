@@ -3,7 +3,7 @@ import type { Auction, AuctionDetail, Direction } from '@kristy/shared';
 import { HttpError } from '../core/httpError';
 import { toysRepository } from '../toys/toys.repository';
 import { auctionRepository } from './auction.repository';
-import { createAuction, navigate, setActiveToy } from './auction.service';
+import { createAuction, navigate, selectToy, setActiveToy } from './auction.service';
 
 function current(): Auction {
   const auction = auctionRepository.get();
@@ -51,6 +51,12 @@ auctionRouter.delete('/', (_req, res) => {
 
 auctionRouter.post('/active', (req, res) => {
   const auction = setActiveToy(current(), String(req.body?.toyId ?? ''));
+  auctionRepository.save(auction);
+  res.json(toDetail(auction));
+});
+
+auctionRouter.post('/select', (req, res) => {
+  const auction = selectToy(current(), String(req.body?.toyId ?? ''), toysRepository.all());
   auctionRepository.save(auction);
   res.json(toDetail(auction));
 });

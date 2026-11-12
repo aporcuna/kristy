@@ -105,7 +105,7 @@ describe('AuctionToyList', () => {
     expect(onSelect).toHaveBeenCalledWith('a');
   });
 
-  it('does not offer selection for the active or sold toys', () => {
+  it('does not offer selection for the already-active toy', () => {
     render(
       <AuctionToyList
         toys={[
@@ -117,7 +117,19 @@ describe('AuctionToyList', () => {
       />,
     );
     expect(screen.getByRole('button', { name: /Bear/ })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /Robot/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Robot/ })).not.toBeDisabled();
     expect(screen.getByRole('button', { name: /Kite/ })).not.toBeDisabled();
+  });
+
+  it('calls the selection handler when a sold toy is clicked', () => {
+    const onSelect = vi.fn();
+    render(
+      <AuctionToyList
+        toys={[makeLot('a', 'Robot', '/a.png', 'Sold')]}
+        onSelect={onSelect}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Robot/ }));
+    expect(onSelect).toHaveBeenCalledWith('a');
   });
 });

@@ -13,7 +13,7 @@ export function AuctionPage() {
   const navigate = useNavigate();
   const [auction, setAuction] = useState<AuctionDetail | null>(null);
   const [confirmClose, setConfirmClose] = useState(false);
-  const [confirmSelectToyId, setConfirmSelectToyId] = useState<string | null>(null);
+  const [confirmToy, setConfirmToy] = useState<{ toyId: string; reopen: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Load the running auction; it opens on its first toy.
@@ -43,15 +43,21 @@ export function AuctionPage() {
     }
   };
 
+  const requestSelect = (toyId: string) => {
+    const toy = auction?.toys.find((t) => t.toyId === toyId);
+    if (!toy || toy.status === 'Active') return;
+    setConfirmToy({ toyId, reopen: toy.status === 'Sold' });
+  };
+
   const confirmSelect = async () => {
-    if (!confirmSelectToyId) return;
+    if (!confirmToy) return;
     try {
-      setAuction(await auctionService.setActive(confirmSelectToyId));
+      setAuction(await auctionService.select(confirmToy.toyId));
       setError(null);
     } catch (e) {
       setError(errorMessage(e));
     } finally {
-      setConfirmSelectToyId(null);
+      setConfirmToy(null);
     }
   };
 
@@ -76,7 +82,7 @@ export function AuctionPage() {
       <div className="auction">
         {error && <div className="error">{error}</div>}
         <div className="auction__body">
-          <AuctionToyList toys={auction.toys} onSelect={setConfirmSelectToyId} />
+          <AuctionToyList toys={auction.toys} onSelect={requestSelect} />
           {active ? <ToyDetailPanel lot={active} /> : <p className="muted">No toy selected.</p>}
         </div>
         <div className="auction__controls">
@@ -86,13 +92,23 @@ export function AuctionPage() {
         </div>
       </div>
 
-      {confirmSelectToyId && (
+      {confirmToy && !confirmToy.reopen && (
         <ConfirmDialog
           title="Change active toy"
           message="Are you sure to change the active toy?"
           confirmLabel="Change toy"
           onConfirm={confirmSelect}
-          onCancel={() => setConfirmSelectToyId(null)}
+          onCancel={() => setConfirmToy(null)}
+        />
+      )}
+
+      {confirmToy && confirmToy.reopen && (
+        <ConfirmDialog
+          title="Reopen sold toy"
+          message="Are you sure you want to reopen this sold toy? It will become active again at its start price, with the sale price and bidder cleared."
+          confirmLabel="Reopen toy"
+          onConfirm={confirmSelect}
+          onCancel={() => setConfirmToy(null)}
         />
       )}
 

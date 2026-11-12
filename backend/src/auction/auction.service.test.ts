@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Auction, AuctionToyStatus, Toy } from '@kristy/shared';
-import { createAuction, navigate, setActiveToy } from './auction.service';
+import { createAuction, navigate, selectToy, setActiveToy } from './auction.service';
 
 const toy = (id: string, startPrice = 50): Toy => ({
   id,
@@ -65,6 +65,28 @@ describe('setActiveToy', () => {
   it('rejects unknown and sold toys', () => {
     expect(() => setActiveToy(auctionWith({ A: 'New' }), 'Z')).toThrow();
     expect(() => setActiveToy(auctionWith({ A: 'Sold' }), 'A')).toThrow();
+  });
+});
+
+describe('selectToy', () => {
+  it('persists activation of a New toy', () => {
+    const next = selectToy(auctionWith({ A: 'Active', B: 'New' }), 'B', [toy('B', 20)]);
+    expect(statusOf(next)).toEqual({ A: 'New', B: 'Active' });
+  });
+
+  it('persists the reset when reopening a Sold toy', () => {
+    const next = selectToy(auctionWith({ A: 'Sold', B: 'Active' }, ['A']), 'A', [toy('A', 20)]);
+    expect(next.toys[0]).toMatchObject({
+      status: 'Active',
+      nextBidPrice: 20,
+      salePrice: null,
+      currentBidderId: null,
+    });
+    expect(statusOf(next)).toEqual({ A: 'Active', B: 'New' });
+  });
+
+  it('rejects a toy that is not part of the auction', () => {
+    expect(() => selectToy(auctionWith({ A: 'New' }), 'Z', [toy('Z')])).toThrow('not part of the auction');
   });
 });
 
