@@ -1,4 +1,10 @@
-import type { AuctionToyDetail, AuctionToyStatus, Direction } from './types';
+import type {
+  Auction,
+  AuctionToy,
+  AuctionToyDetail,
+  AuctionToyStatus,
+  Direction,
+} from './types';
 
 interface HasStatus {
   status: AuctionToyStatus;
@@ -34,6 +40,39 @@ export function buildAuctionToyListItems(toys: AuctionToyDetail[]): AuctionToyLi
     status: lot.status,
     isActive: lot.status === 'Active',
   }));
+}
+
+/**
+ * Makes `toyId` the active toy. The previous active toy goes On hold when it
+ * has at least one bid (keeping its prices and bidder), otherwise back to New.
+ * A Sold toy is reopened and reset to its start price with no sale price or
+ * bidder. Selecting the already-active toy changes nothing.
+ */
+export function selectToy(auction: Auction, toyId: string, startPrice: number): Auction {
+  const target = auction.toys.find((t) => t.toyId === toyId);
+  if (!target) throw new Error('Toy is not part of the auction');
+  if (target.status === 'Active') return auction;
+
+  return {
+    ...auction,
+    toys: auction.toys.map((t): AuctionToy => {
+      if (t.toyId === toyId) {
+        return t.status === 'Sold'
+          ? {
+              ...t,
+              status: 'Active',
+              nextBidPrice: startPrice,
+              salePrice: null,
+              currentBidderId: null,
+            }
+          : { ...t, status: 'Active' };
+      }
+      if (t.status === 'Active') {
+        return { ...t, status: t.currentBidderId !== null ? 'On hold' : 'New' };
+      }
+      return t;
+    }),
+  };
 }
 
 /**

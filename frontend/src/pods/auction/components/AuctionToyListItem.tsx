@@ -18,7 +18,7 @@ export function AuctionToyListItem({ item, onSelect }: AuctionToyListItemProps) 
         type="button"
         className="toy-list__select"
         onClick={() => onSelect(item.toyId)}
-        disabled={item.isActive || item.status === 'Sold'}
+        disabled={item.isActive}
       >
         <ImageFrame size="thumb" src={item.photo} alt={item.name} />
         <div className="toy-list__meta">
